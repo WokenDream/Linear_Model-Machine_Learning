@@ -2,12 +2,12 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 
-def buildGraph():
+def buildGraph(learning_rate=0.005):
     # straight from tutorial ex3
-    W = tf.Variable(tf.truncated_normal([28, 1], stddev=0.5), name='W')
+    W = tf.Variable(tf.truncated_normal(shape=[28*28, 1], stddev=0.5), name='W')
     b = tf.Variable(0.0, name='b')
-    X = tf.placeholder(tf.float32, [None, 28], name='X')
-    y = tf.placeholder(tf.float32, [None,1], name='y')
+    X = tf.placeholder(tf.float32, [None, 28*28], name='X')
+    y = tf.placeholder(tf.float32, [None, 1], name='y')
     lamda = tf.placeholder(tf.float32, name='lambda')
 
     # build linear model/graph
@@ -16,7 +16,7 @@ def buildGraph():
     reg_loss = lamda * tf.nn.l2_loss(W)
     total_loss = mse + reg_loss
 
-    optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.01)
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate=learning_rate)
     train = optimizer.minimize(loss=total_loss)
 
     return W, b, X, y, lamda, y_hat, mse, train
@@ -56,27 +56,57 @@ if __name__ == "__main__":
 
     lamda_val = 0
 
-    w_list = []
+    W_list = []
     train_error_list = []
     valid_error_list = []
     test_error_list = []
 
-    # 3500/500 = 7 mini-batches
-    # 1 iteration = 1 pass through 1 mini-batch
-    # 1 epoch = 7 mini-batches (# of mini-batches)
-    # => 20000/7 epochs in total
     batch_size = 500
-    num_iteration = 20000
+    num_iterations = 20000
     num_train = trainData.shape[0]
-    num_batches = num_train / batch_size
-    print("number of batches: ", batch_size)
+    num_batches = num_train // batch_size
+    num_epochs = num_iterations // num_batches
+    num_iterations_leftover = num_iterations % num_batches
+    print("batch size:", batch_size, "; number of batches", num_batches)
+    print("number of epochs:", num_epochs, "; epoch left-overs:", num_iterations_leftover)
+    print("number of iterations:", num_iterations)
 
-    # TODO: figure out what to do
-    for step in range(num_iteration):
-        # if this is a new batch
-        if step % batch_size == 0:
-            batch_inds = np.random.choice(num_train, batch_size, replace=True)
-            batch_trainData = trainData[batch_inds]
-        _, err, currentW, currentb, yhat = sess.run([train, mse, W, b, y_hat], feed_dict={
+    shuffled_inds = np.arange(num_train)
+    # follow lecture notes
+    for epoch in range(num_epochs):
+        # TODO: permute the order of training examples
+        # permuted_train_inds = np.random.choice(num_train, batch_size, replace=True)
+        np.random.shuffle(shuffled_inds)
 
-        })
+        temp_trainData = trainData[shuffled_inds]
+        temp_trainTargets = trainTarget[shuffled_inds]
+        for j in range(num_batches):
+            batch_trainData = temp_trainData[j * batch_size : (j + 1) * batch_size].reshape(batch_size, -1)
+            batch_targets = temp_trainTargets[j * batch_size : (j + 1) * batch_size]
+            _, err, currentW, currentb, yhat = sess.run([train, mse, W, b, y_hat], feed_dict={
+                X: batch_trainData,
+                y: batch_targets,
+                lamda: lamda_val
+            })
+        W_list.append(currentW)
+        train_error_list.append(err)
+        # print("epoch ", epoch, " train error: ", err)
+
+    # np.random.shuffle(shuffled_inds)
+    # temp_trainData = trainData[shuffled_inds]
+    # temp_trainTargets = trainTarget[shuffled_inds]
+    # for iter in num_iterations_leftover:
+    #     batch_trainData = temp_trainData[iter * batch_size: (iter + 1) * batch_size].reshape(batch_size, -1)
+    #     batch_targets = temp_trainTargets[iter * batch_size: (iter + 1) * batch_size]
+    #     _, err, currentW, currentb, yhat = sess.run([train, mse, W, b, y_hat], feed_dict={
+    #         X: batch_trainData,
+    #         y: batch_targets,
+    #         lamda: lamda_val
+    #     })
+    # W_list.append(currentW)
+    # train_error_list.append(err)
+    # print("epoch ", epoch, " train error: ", err)
+
+    plt.plot(np.arange(num_epochs), train_error_list)
+    plt.title("SGD training - error vs epoch #")
+    plt.show()
