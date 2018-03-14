@@ -17,11 +17,31 @@
       <file leaf-file-name="Part1.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Part1.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="430">
-              <caret line="174" column="14" lean-forward="true" selection-start-line="174" selection-start-column="14" selection-end-line="174" selection-end-column="14" />
+            <state relative-caret-position="218">
+              <caret line="175" column="29" lean-forward="false" selection-start-line="175" selection-start-column="29" selection-end-line="175" selection-end-column="29" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="multiarray.py" pinned="false" current-in-tab="false">
+        <entry file="file://$USER_HOME$/Library/Caches/PyCharmCE2017.3/python_stubs/-2010535109/numpy/core/multiarray.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="169">
+              <caret line="53" column="4" lean-forward="false" selection-start-line="53" selection-start-column="4" selection-end-line="53" selection-end-column="4" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="npyio.py" pinned="false" current-in-tab="false">
+        <entry file="file:///Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/numpy/lib/npyio.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="169">
+              <caret line="1062" column="4" lean-forward="false" selection-start-line="1062" selection-start-column="4" selection-end-line="1062" selection-end-column="4" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -54,6 +74,7 @@
       <find>num_iterations_leftover</find>
       <find>plt.</find>
       <find>for</find>
+      <find>sess.run</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -311,10 +332,26 @@
         </state>
       </provider>
     </entry>
+    <entry file="file:///Library/Frameworks/Python.framework/Versions/3.6/lib/python3.6/site-packages/numpy/lib/npyio.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="169">
+          <caret line="1062" column="4" lean-forward="false" selection-start-line="1062" selection-start-column="4" selection-end-line="1062" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/Library/Caches/PyCharmCE2017.3/python_stubs/-2010535109/numpy/core/multiarray.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="169">
+          <caret line="53" column="4" lean-forward="false" selection-start-line="53" selection-start-column="4" selection-end-line="53" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/Part1.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="430">
-          <caret line="174" column="14" lean-forward="true" selection-start-line="174" selection-start-column="14" selection-end-line="174" selection-end-column="14" />
+        <state relative-caret-position="218">
+          <caret line="175" column="29" lean-forward="false" selection-start-line="175" selection-start-column="29" selection-end-line="175" selection-end-column="29" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>

@@ -159,6 +159,7 @@ def part_1_2(trainData, trainTarget):
                 train_error_list.append(err)
 
             stop_time_sec = time.time()
+            np.save("part1_2_W" + str(batch_size), W_list[-1])
             with open("part_1_2.txt", "a") as file:
                 file.write("for batch size = " + str(batch_size) + ":\n")
                 file.write("\tmse = " + str(err) + "; time taken = " + str(stop_time_sec - start_time_sec) + "\n")
@@ -168,11 +169,11 @@ def part_1_2(trainData, trainTarget):
                 plt.plot(np.arange(num_epochs + 1), train_error_list, linewidth=0.8)
             else:
                 plt.plot(np.arange(num_epochs), train_error_list, linewidth=0.8)
+            # plt.yticks(np.arange(min(train_error_list), max(train_error_list) + 1, 1))
 
-    plt.title("SGD training - error vs epoch #")
-    plt.legend(['batch size: 500', 'batch size: 1500', 'batch size: 3500'])
-    plt.savefig("part_1_2", dpi=600)
-    plt.show()
+            plt.title("SGD training - batch size: " + str (batch_size) + " - error vs epoch #")
+            plt.savefig("part_1_2_batch_size" + str(batch_size), dpi=600)
+            plt.gcf().clear()
 
 
 if __name__ == "__main__":
