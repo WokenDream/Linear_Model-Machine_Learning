@@ -13,7 +13,7 @@ def buildGraph(learning_rate=0.005):
 
     # build linear model/graph
     y_hat = tf.matmul(X, W) + b
-    mse = tf.reduce_mean(tf.reduce_mean(tf.square(y - y_hat), reduction_indices=1, name='squared_error'), name="MSE")
+    mse = 0.5 * tf.reduce_mean(tf.reduce_mean(tf.square(y - y_hat), reduction_indices=1, name='squared_error'), name="MSE")
     reg_loss = lamda * tf.nn.l2_loss(W)
     total_loss = mse + reg_loss
 
@@ -175,10 +175,123 @@ def part_1_2(trainData, trainTarget):
             plt.savefig("part_1_2_batch_size" + str(batch_size), dpi=600)
             plt.gcf().clear()
 
+def part_1_3(trainData, trainTarget, validData, validTarget, testData, testTarget):
+    lr = 0.005
+    batch_size = 500
+    num_iterations = 20000
+    num_train = trainData.shape[0]
+    num_batches = num_train // batch_size
+    num_epochs = num_iterations // num_batches
+    num_iterations_leftover = num_iterations % num_batches
+    print("batch size:", batch_size, "; number of batches", num_batches)
+    print("number of epochs:", num_epochs, "; iteration left-overs:", num_iterations_leftover)
+    print("number of iterations:", num_iterations)
+
+    i = 0
+    for lamda_val in [0, 0.001, 0.1, 1]:
+        i += 1
+        W, b, X, y, lamda, y_hat, mse, train = buildGraph(lr)
+
+        init = tf.global_variables_initializer()
+        with tf.Session() as sess:
+            sess.run(init)
+            W_list = []
+            train_error_list = []
+
+            shuffled_inds = np.arange(num_train)
+            # follow lecture notes
+            for epoch in range(num_epochs):
+                np.random.shuffle(shuffled_inds)
+                temp_trainData = trainData[shuffled_inds]
+                temp_trainTargets = trainTarget[shuffled_inds]
+
+                for j in range(num_batches):
+                    batch_trainData = temp_trainData[j * batch_size: (j + 1) * batch_size].reshape(batch_size, -1)
+                    batch_targets = temp_trainTargets[j * batch_size: (j + 1) * batch_size]
+                    _, err, currentW, currentb, yhat = sess.run([train, mse, W, b, y_hat], feed_dict={
+                        X: batch_trainData,
+                        y: batch_targets,
+                        lamda: lamda_val
+                    })
+                W_list.append(currentW)
+                train_error_list.append(err)
+                # print("epoch ", epoch, " train error: ", err)
+
+            # train on the last epoch which is an incomplete epoch
+            if (num_iterations_leftover != 0):
+                # print("# of batches does not divide # of iterations, training over the remaining")
+                np.random.shuffle(shuffled_inds)
+                temp_trainData = trainData[shuffled_inds]
+                temp_trainTargets = trainTarget[shuffled_inds]
+                for iter in range(num_iterations_leftover):
+                    batch_trainData = temp_trainData[iter * batch_size: (iter + 1) * batch_size].reshape(batch_size, -1)
+                    batch_targets = temp_trainTargets[iter * batch_size: (iter + 1) * batch_size]
+                    _, err, currentW, currentb, yhat = sess.run([train, mse, W, b, y_hat], feed_dict={
+                        X: batch_trainData,
+                        y: batch_targets,
+                        lamda: lamda_val
+                    })
+                W_list.append(currentW)
+                train_error_list.append(err)
+            np.save("part1_3_W" + str(i), W_list[-1])
+            with open("part_1_3.txt", "a") as file:
+                file.write("final mse for reg = " + str(lamda_val) + ": " + str(err) + "\n")
+            print("final mse:", err, "for lambda:", lamda_val)
+
+            plt.plot(np.arange(num_epochs + 1), train_error_list, linewidth=0.8)
+    plt.title("SGD training - error vs epoch #")
+    plt.legend(['lambda: 0', 'lambda: 0.001', 'lambda: 0.1', 'lambda: 1'])
+    plt.savefig("part_1_3", dpi=600)
+
+
+    # values obtained from before
+    W_val1 = np.load("./part1_3_W1.npy")
+    W_val2 = np.load("./part1_3_W2.npy")
+    W_val3 = np.load("./part1_3_W3.npy")
+    W_val4 = np.load("./part1_3_W4.npy")
+    b = tf.constant(0.0, dtype=tf.float32)
+    best_acc = 0.0
+    best_Ws = []
+    best_lambda_vals = []
+
+    with tf.Session() as sess:
+        X = tf.constant(validData.reshape(-1, 28 * 28), dtype=tf.float32)
+
+        for (W_val, lamda_val) in zip([W_val1, W_val2, W_val3, W_val4], [0, 0.001, 0.1, 1]):
+            W = tf.constant(W_val, dtype=tf.float32)
+            y_hat = tf.sigmoid(tf.matmul(X, W) + b)
+            y_hat_val = sess.run(y_hat)
+            y_hat_val[y_hat_val > 0.5] = 1
+            y_hat_val[y_hat_val < 0.5] = 0
+            acc = np.mean(y_hat_val == validTarget)
+            print("validation accuracy for lambda =", lamda_val, ":", acc)
+            if (acc == best_acc):
+                best_lambda_vals.append(lamda_val)
+                best_Ws.append(W)
+            elif (acc > best_acc):
+                best_acc = acc
+                best_Ws.clear()
+                best_lambda_vals.clear()
+                best_lambda_vals.append(lamda_val)
+                best_Ws.append(W)
+            with open("part_1_3.txt", "a") as file:
+                file.write("validation accuracy for lamdba = " + str(lamda_val) + ": " + str(acc) + "\n")
+        print("best lambdas:", best_lambda_vals)
+        with open("part_1_3.txt", "a") as file:
+            file.write("best lambdas: " + str(best_lambda_vals))
+
+        X = tf.constant(testData.reshape(-1, 28 * 28), dtype=tf.float32)
+        for (W, lamda_val) in zip(best_Ws, best_lambda_vals):
+            y_hat = tf.sigmoid(tf.matmul(X, W) + b)
+            y_hat_val = sess.run(y_hat)
+            y_hat_val[y_hat_val > 0.5] = 1
+            y_hat_val[y_hat_val < 0.5] = 0
+            acc = np.mean(y_hat_val == testTarget)
+            print("test accuracy for lambdas =", lamda_val, ":", acc)
+            with open("part_1_3.txt", "a") as file:
+                file.write("test accuracy for lambdas = " + str(lamda_val) + ":" + str(acc) + "\n")
 
 if __name__ == "__main__":
-    # plt.plot(np.arange(2500), np.arange(2500), linewidth=1.0)
-    # plt.show()
     with np.load("notMNIST.npz") as data:
         Data, Target = data["images"], data["labels"]
         posClass = 2
@@ -202,4 +315,5 @@ if __name__ == "__main__":
     print("testData shape", testData.shape)
     print("testTarget shape", testTarget.shape)
     # part_1_1(trainData, trainTarget)
-    part_1_2(trainData, trainTarget)
+    # part_1_2(trainData, trainTarget)
+    part_1_3(trainData, trainTarget, validData, validTarget, testData, testTarget)
