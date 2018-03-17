@@ -26,6 +26,7 @@ def buildGraph(learning_rate=0.005, useAdam=False):
     return W, b, X, y, lamda, logits, mean_entropy, train
 
 
+
 def part_2_1_1(trainData, trainTarget, validData, validTarget, testData, testTarget):
     reshapedTrainData = tf.constant(trainData.reshape(-1, 28 * 28), dtype=tf.float32)
     reshapedValidData = tf.constant(validData.reshape(-1, 28 * 28), dtype=tf.float32)
@@ -42,9 +43,9 @@ def part_2_1_1(trainData, trainTarget, validData, validTarget, testData, testTar
     print("batch size:", batch_size, "; number of batches", num_batches)
     print("number of epochs:", num_epochs, "; iteration left-overs:", num_iterations_leftover)
     print("number of iterations:", num_iterations)
-    # for lr in [0.005]: # this is the best after tuning
     i = 0
-    for lr in [0.005, 0.001, 0.0001]:
+    for lr in [0.005]: # this is the best after tuning
+    # for lr in [0.005, 0.001, 0.0001]:
         i += 1
         W, b, X, y, lamda, logits, mean_entropy, train = buildGraph(lr)
         init = tf.global_variables_initializer()
@@ -128,7 +129,9 @@ def part_2_1_1(trainData, trainTarget, validData, validTarget, testData, testTar
                 validAcc = np.mean(y_hat_val == validTarget)
                 valid_acc_list.append(validAcc)
 
-            np.save("part2_1_1W" + str(i), W_list[-1])
+            # np.save("part2_1_1Wbest.npy", W_list[-1])
+            # np.save("part2_1_1W" + str(i), W_list[-1])
+            np.save("part2_1_1W" + str("0001"), W_list[-1])
             with open("part_2_1_1.txt", "a") as file:
                 file.write("final training err for learning rate = " + str(lr) + ": " + str(err) + "\n")
                 file.write("final training acc for learning rate = " + str(lr) + ": " + str(acc) + "\n")
@@ -149,11 +152,13 @@ def part_2_1_1(trainData, trainTarget, validData, validTarget, testData, testTar
     plt.subplot(2, 1, 1)
     # plt.plot(np.arange(num_epochs + 1), train_error_list)
     plt.title("SGD training - error vs epoch #")
-    plt.legend(['best learning rate: 0.005'], ['best learning rate: 0.001'], ['best learning rate: 0.0001'])
+    plt.legend(['best learning rate: 0.001'])
+    # plt.legend(['best learning rate: 0.005'], ['best learning rate: 0.001'], ['best learning rate: 0.0001'])
     plt.subplot(2, 1, 2)
     # plt.plot(np.arange(num_epochs + 1), train_acc_list)
     plt.title("SGD training - acc vs epoch #")
-    plt.legend(['best learning rate: 0.005'], ['best learning rate: 0.001'], ['best learning rate: 0.0001'])
+    plt.legend(['best learning rate: 0.001'])
+    # plt.legend(['best learning rate: 0.005'], ['best learning rate: 0.001'], ['best learning rate: 0.0001'])
     plt.tight_layout()
     plt.savefig("part_2_1_1_train", dpi=600)
     plt.gcf().clear()
@@ -184,7 +189,7 @@ def part_2_1_1(trainData, trainTarget, validData, validTarget, testData, testTar
 
 
 def part_2_1_2(trainData, trainTarget):
-    reshapedTrainData = tf.constant(trainData.reshape(-1, 28 * 28), dtype=tf.float32)
+    # reshapedTrainData = tf.constant(trainData.reshape(-1, 28 * 28), dtype=tf.float32)
     lamda_val = 0.01
     lr = 0.001
     batch_size = 500
@@ -237,7 +242,7 @@ def part_2_1_2(trainData, trainTarget):
             SGD_error_list.append(err_SGD)
             Adam_error_list.append(err_Adam)
 
-            y_hat = tf.sigmoid(tf.matmul(reshapedTrainData, currentW_SGD) + b_SGD)
+            y_hat = tf.sigmoid(tf.matmul(tf.constant(batch_trainData.reshape(-1, 28 * 28), dtype=tf.float32), currentW_SGD) + b_SGD)
             y_hat_val = sess.run(y_hat)
             y_hat_val[y_hat_val > 0.5] = 1
             y_hat_val[y_hat_val < 0.5] = 0
@@ -251,7 +256,6 @@ def part_2_1_2(trainData, trainTarget):
             acc = np.mean(y_hat_val == trainTarget)
             Adam_acc_list.append(acc)
 
-        # TODO: if left over
         # train on the last epoch which is an incomplete epoch
         if (num_iterations_leftover != 0):
             np.random.shuffle(shuffled_inds)
@@ -316,7 +320,8 @@ def part_2_1_2(trainData, trainTarget):
         plt.savefig("part_2_1_2", dpi=600)
 
 
-if __name__ == "__main__":
+
+def part_2_1():
     with np.load("notMNIST.npz") as data:
         Data, Target = data["images"], data["labels"]
         posClass = 2
@@ -339,5 +344,9 @@ if __name__ == "__main__":
     print("validTarget shape", validTarget.shape)
     print("testData shape", testData.shape)
     print("testTarget shape", testTarget.shape)
-    # part_2_1_2(trainData, trainTarget)
-    part_2_1_1(trainData, trainTarget, validData, validTarget, testData, testTarget)
+    # part_2_1_1(trainData, trainTarget, validData, validTarget, testData, testTarget)
+    part_2_1_2(trainData, trainTarget)
+
+
+if __name__ == "__main__":
+    part_2_1()

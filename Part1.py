@@ -259,7 +259,6 @@ def part_1_3(trainData, trainTarget, validData, validTarget, testData, testTarge
 
         for (W_val, lamda_val) in zip([W_val1, W_val2, W_val3, W_val4], [0, 0.001, 0.1, 1]):
             W = tf.constant(W_val, dtype=tf.float32)
-            # y_hat = tf.sigmoid(tf.matmul(X, W) + b)
             y_hat = tf.matmul(X, W) + b
             y_hat_val = sess.run(y_hat)
             y_hat_val[y_hat_val > 0.5] = 1
@@ -283,7 +282,6 @@ def part_1_3(trainData, trainTarget, validData, validTarget, testData, testTarge
 
         X = tf.constant(testData.reshape(-1, 28 * 28), dtype=tf.float32)
         for (W, lamda_val) in zip(best_Ws, best_lambda_vals):
-            # y_hat = tf.sigmoid(tf.matmul(X, W) + b)
             y_hat = tf.matmul(X, W) + b
             y_hat_val = sess.run(y_hat)
             y_hat_val[y_hat_val > 0.5] = 1
@@ -294,9 +292,6 @@ def part_1_3(trainData, trainTarget, validData, validTarget, testData, testTarge
                 file.write("test accuracy for lambdas = " + str(lamda_val) + ":" + str(acc) + "\n")
 
 
-def part_1_4():
-    # (X^T * X)^-1 * X^T * Y
-    pass
 
 if __name__ == "__main__":
     with np.load("notMNIST.npz") as data:
